@@ -5,7 +5,6 @@ from stringcase import snakecase
 import ulid
 from sqlalchemy import Column
 from sqlalchemy.sql import func
-from util.tz_datetime import TZDateTime
 
 class SQLModel(_SQLModel):
     @declared_attr  # type: ignore
@@ -13,7 +12,7 @@ class SQLModel(_SQLModel):
         return snakecase(cls.__name__)
 
 def generate_ulid() -> str:
-    return str(ulid.new())
+    return str(ulid.ulid())
 
 class BaseFieldModel(SQLModel):
     id: str | None = Field(
@@ -27,14 +26,7 @@ class BaseFieldModel(SQLModel):
 class BaseEntryModel(BaseFieldModel):
     created_by: str = Field(default="admin")
     updated_by: str = Field(default="admin")
-    created_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
-    updated_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
-
-    # Define columns directly with SQLAlchemy for automatic timestamp management
-    @declared_attr
-    def created_at(cls) -> Column:
-        return Column(TZDateTime, nullable=False, default=datetime.now(timezone.utc))
-
-    @declared_attr
-    def updated_at(cls) -> Column:
-        return Column(TZDateTime, nullable=False, default=datetime.now(timezone.utc), onupdate=datetime.now(timezone.utc))
+    updated_at: datetime | None = Field(
+        default_factory=datetime.utcnow, sa_column_kwargs={"onupdate": datetime.utcnow}
+    )
+    created_at: datetime | None = Field(default_factory=datetime.utcnow)

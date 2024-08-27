@@ -1,10 +1,13 @@
-from typing import List
 from pydantic_settings import BaseSettings
+from dotenv import load_dotenv
+
+load_dotenv()
 
 class Settings(BaseSettings):
-    # BACKEND_CORS_ORIGINS: List[str]
-    DB_CONFIG: str
-    
+    DATABASE_URL: str
+    SECRET_KEY: str
+    DEBUG: bool = False
+
     class Config:
         env_file = ".env"
 

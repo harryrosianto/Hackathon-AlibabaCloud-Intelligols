@@ -1,11 +1,11 @@
 from pydantic import field_validator
 from sqlmodel import Field, Relationship, SQLModel
-from typing import TYPE_CHECKING, List
-from models.base import BaseEntryModel
+from typing import TYPE_CHECKING
+from models.model import BaseEntryModel
 from schemas.common import UserRoleEnum
 
 if TYPE_CHECKING:
-    from models.product import Product
+    from .product import Product
 
 class UserBase(SQLModel):
     username: str = Field(nullable=False, max_length=50, unique=True)
@@ -14,23 +14,23 @@ class UserBase(SQLModel):
     role: UserRoleEnum = Field(nullable=False, default=0)
     is_active: bool = Field(nullable=False, default=True)
     
-    @field_validator('username')
-    def validate_code(cls, value):
-        return value.lower()
+    # @field_validator('username')
+    # def validate_code(cls, value):
+    #     return value.lower()
     
-    @field_validator('name')
-    def validate_code(cls, value):
-        return value.title()
+    # @field_validator('name')
+    # def validate_code(cls, value):
+    #     return value.title()
 
-class UserFullBase(UserBase, BaseEntryModel):
+class UserFullBase(BaseEntryModel, UserBase):
     pass
 
 class User(UserFullBase, table=True):
-    product: List['Product'] = Relationship(back_populates='user',  sa_relationship_kwargs={
+    products: list['Product'] = Relationship(back_populates='user',  sa_relationship_kwargs={
         'lazy': 'selectin',
         'foreign_keys': 'Product.farmer_id'
     })
-    
+
     
     
 # from pydantic import BaseModel

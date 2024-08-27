@@ -5,9 +5,10 @@ from fastapi.logger import logger as fastapi_logger
 from fastapi_async_sqlalchemy import SQLAlchemyMiddleware
 from fastapi_pagination import add_pagination
 from fastapi.middleware.cors import CORSMiddleware
-from util.config.config import settings
+from util.config import settings
 from routes import api
-from util.config.config import settings
+from util.config import settings
+from util.database import init_db
 
 def init_app():
     
@@ -25,6 +26,7 @@ def init_app():
     @app.on_event("startup")
     async def startup():
         pass
+        # await init_db()
         
     @app.get("/")
     async def root():
@@ -33,7 +35,7 @@ def init_app():
     # app.add_middleware(ContextMiddleware)
     app.add_middleware(
     SQLAlchemyMiddleware,
-        db_url=settings.DB_CONFIG,
+        db_url=settings.DATABASE_URL,
         engine_args={
             "echo": False,
             "pool_pre_ping": True,

@@ -2,7 +2,7 @@ import math
 from typing import Any, Dict, Generic, Sequence, Union, Optional, TypeVar
 from fastapi_pagination import Params, Page
 from fastapi_pagination.bases import AbstractPage, AbstractParams
-from pydantic.generics import GenericModel
+from pydantic import BaseModel
 
 T = TypeVar("T")
 
@@ -13,7 +13,7 @@ class PageBase(Page[T], Generic[T]):
     previous_page: int | None
 
 
-class ResponseBaseSch(GenericModel, Generic[T]):
+class ResponseBaseSch(BaseModel, Generic[T]):
     message: str = ""
     meta: Dict = {}
     data: T | None
@@ -24,7 +24,7 @@ class ResponsePageSch(AbstractPage[T], Generic[T]):
     meta: Dict = {}
     data: PageBase[T]
 
-    __params_type__ = Params  # Set params related to Page
+    __params_type__ = Params
 
     @classmethod
     def create(
@@ -32,7 +32,7 @@ class ResponsePageSch(AbstractPage[T], Generic[T]):
         items: Sequence[T],
         total: int,
         params: AbstractParams,
-    ) -> PageBase[T] | None:
+    ) -> "ResponsePageSch[T]":
         pages = math.ceil(total / params.size)
         return cls(
             data=PageBase(
@@ -45,7 +45,6 @@ class ResponsePageSch(AbstractPage[T], Generic[T]):
                 previous_page=params.page - 1 if params.page > 1 else None,
             )
         )
-
 
 class GetResponseBaseSch(ResponseBaseSch[T], Generic[T]):
     message: str = "Data got correctly"
