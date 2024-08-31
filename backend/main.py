@@ -5,18 +5,17 @@ from fastapi.logger import logger as fastapi_logger
 from fastapi_async_sqlalchemy import SQLAlchemyMiddleware
 from fastapi_pagination import add_pagination
 from fastapi.middleware.cors import CORSMiddleware
-from util.config import settings
+from config.config import settings
 from routes import api
-from util.config import settings
-from util.database import init_db
+from config.config import settings
 
 def init_app():
     
     description = """
-        This is a service for TUMBAS COFFEE.
+        This is a service for MESER COFFEE.
     """
 
-    app = FastAPI(title="TUMBAS COFFEE",
+    app = FastAPI(title="MESER COFFEE",
         description=description,
         version="2.0",
         docs_url="/docs",
@@ -51,7 +50,7 @@ def init_app():
         allow_methods=["*"],
         allow_headers=["*"],
     )
-    app.include_router(api.api_router, prefix="/tumbascoffee")
+    app.include_router(api.api_router, prefix="/mesercoffee")
     add_pagination(app)
 
     gunicorn_error_logger = logging.getLogger("gunicorn.error")

@@ -8,7 +8,7 @@ import sys
 import pathlib
 
 sys.path.append(str(pathlib.Path(__file__).resolve().parents[1]))
-from util.config import Settings
+from config.config import Settings
 
 
 from models import *  # necessarily to import something from file where your models are stored

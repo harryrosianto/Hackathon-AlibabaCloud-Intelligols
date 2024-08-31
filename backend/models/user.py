@@ -1,18 +1,30 @@
-from pydantic import field_validator
-from sqlmodel import Field, Relationship, SQLModel
+from datetime import datetime
+from pydantic import EmailStr, field_validator
+from sqlmodel import Field, Relationship, SQLModel, Column, String, DateTime
 from typing import TYPE_CHECKING
 from models.model import BaseEntryModel
-from schemas.common import UserRoleEnum
+from models.role import Role
+from schemas.common import GenderEnum
 
 if TYPE_CHECKING:
-    from .product import Product
+    from .bean_quality import BeanQuality
 
 class UserBase(SQLModel):
     username: str = Field(nullable=False, max_length=50, unique=True)
     name: str = Field(nullable=False, max_length=255)
-    email: str = Field(nullable=False, max_length=255)
-    role: UserRoleEnum = Field(nullable=False, default=0)
+    email: EmailStr = Field(sa_column=Column(String, index=True, unique=True))
+    birthdate: datetime | None = Field(
+        default=None, sa_column=Column(DateTime(timezone=True), nullable=True)
+    )  # birthday with timezone
+    role_id: str = Field(nullable=False, foreign_key="role.id")
     is_active: bool = Field(nullable=False, default=True)
+    phone: str | None = None
+    gender: GenderEnum | None = Field(
+        default=GenderEnum.other
+    )
+    state: str | None = None
+    country: str | None = None
+    address: str | None = None
     
     # @field_validator('username')
     # def validate_code(cls, value):
@@ -23,13 +35,16 @@ class UserBase(SQLModel):
     #     return value.title()
 
 class UserFullBase(BaseEntryModel, UserBase):
-    pass
+    hashed_password: str | None = Field(default=None, nullable=False, index=True)
 
 class User(UserFullBase, table=True):
-    products: list['Product'] = Relationship(back_populates='user',  sa_relationship_kwargs={
-        'lazy': 'selectin',
-        'foreign_keys': 'Product.farmer_id'
-    })
+    # beanqualitys: list['BeanQuality'] | None = Relationship(back_populates='user',  sa_relationship_kwargs={
+    #     'lazy': 'selectin',
+    #     'foreign_keys': 'BeanQuality.farmer_id'
+    # })
+    role: Role = Relationship(  # noqa: F821
+        back_populates="users", sa_relationship_kwargs={"lazy": "joined"}
+    )
 
     
     
@@ -47,8 +62,8 @@ class User(UserFullBase, table=True):
 #     disabled: Optional[bool] = None
 #     created_at: datetime
 
-# # Coffee Product model
-# class CoffeeProduct(BaseModel):
+# # Coffee BeanQuality model
+# class CoffeeBeanQuality(BaseModel):
 #     id: int
 #     name: str
 #     variety: str
@@ -87,7 +102,7 @@ class User(UserFullBase, table=True):
 # # Buyer's Dashboard model
 # class BuyersDashboard(BaseModel):
 #     buyer_id: int
-#     production_monitoring: List[CoffeeProduct]
+#     production_monitoring: List[CoffeeBeanQuality]
 #     pricing_information: List[dict]  # Placeholder for actual pricing data
 #     transaction_management: List[dict]  # Placeholder for transaction data
 #     communication_tools: List[dict]  # Placeholder for communication data
@@ -102,7 +117,7 @@ class User(UserFullBase, table=True):
 # # Market Place model
 # class Marketplace(BaseModel):
 #     id: int
-#     coffee_listings: List[CoffeeProduct]
+#     coffee_listings: List[CoffeeBeanQuality]
 #     search_filter: List[dict]  # Placeholder for search and filter criteria
 #     purchase_options: List[dict]  # Placeholder for purchase data
 #     ratings_reviews: List[dict]  # Placeholder for rating and review data

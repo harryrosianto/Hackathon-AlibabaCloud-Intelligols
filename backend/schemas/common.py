@@ -9,7 +9,7 @@ class IsActiveEnumSch(str, Enum):
     false = 'false'
     true = 'true'
 
-class UserRoleEnum(IntEnum):
-    ADMIN = 1
-    FARMER = 2
-    BUYER = 3
+class GenderEnum(str, Enum):
+    female = "female"
+    male = "male"
+    other = "other"
